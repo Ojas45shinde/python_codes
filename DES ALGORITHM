@@ -1,0 +1,45 @@
+
+from Crypto.Cipher import DES
+from Crypto.Util.Padding import pad, unpad
+import hashlib
+
+def generate_key_des(password, salt=None):
+    """
+    Generates an 8-byte (64-bit) key suitable for DES from a password using SHA-256.
+    Optionally uses a salt for added security.
+    """
+    if salt is None:
+        salt = b'ThisIsAStaticSaltForDemo'  
+    key = hashlib.sha256(salted_password).digest()
+    return key[:8]  # DES key size is 8 bytes (64 bits)
+
+def encrypt_des(plaintext, key):
+    """
+    Encrypts the plaintext using DES in CBC mode with PKCS#7 padding.
+    """
+    cipher = DES.new(key, DES.MODE_CBC)
+    ciphered_text = cipher.encrypt(pad(plaintext.encode('utf-8'), DES.block_size))
+    iv = cipher.iv
+    return iv + ciphered_text
+
+def decrypt_des(ciphertext, key):
+    """
+    Decrypts the ciphertext using DES in CBC mode with PKCS#7 padding.
+    """
+    iv = ciphertext[:DES.block_size]
+    ciphered_text = ciphertext[DES.block_size:]
+    cipher = DES.new(key, DES.MODE_CBC, iv)
+    decrypted_text = unpad(cipher.decrypt(ciphered_text), DES.block_size).decode('utf-8')
+    return decrypted_text
+
+if __name__ == "__main__":
+    password = "myoldsecretpassword"
+    plaintext = "This message is for DES encryption."
+
+    # Generate an 8-byte key from the password
+
+    custom_ciphertext = encrypt_des(plaintext, custom_key)
+    print(f"DES Ciphertext with Custom Salt (Hex): {custom_ciphertext.hex()}")
+
+    custom_decrypted_text = decrypt_des(custom_ciphertext, custom_key)
+    print(f"DES Decrypted Text with Custom Salt: {custom_decrypted_text}")
